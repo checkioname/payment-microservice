@@ -2,9 +2,9 @@ package repositories
 
 import (
 	"anturiocode/api--payment-service/internal/infrastructure"
-	"anturiocode/api--payment-service/internal/infrastructure/repositories/queries"
 	"context"
 	"go.opentelemetry.io/otel/trace"
+	"time"
 )
 
 type PaymentRepository interface {
@@ -27,6 +27,7 @@ func (p paymentRepository) RegisterPayment(price float32, product_id int32, ctx 
 	_, span := p.t.Start(ctx, "RegisterPayment Database")
 	defer span.End()
 
-	p.s.Query(queries.RegisterPaymentQuery)
+	time.Sleep(2 * time.Second)
+	//p.s.Query(queries.RegisterPaymentQuery)
 	return nil
 }

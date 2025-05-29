@@ -17,7 +17,7 @@ var (
 	OtlpEndpoint string
 )
 
-func newConsoleExporter() (oteltrace.SpanExporter, error) {
+func NewConsoleExporter() (oteltrace.SpanExporter, error) {
 	return stdouttrace.New()
 }
 
@@ -27,7 +27,7 @@ func NewOTLPExporter(ctx context.Context) (oteltrace.SpanExporter, error) {
 	insecureOpt := otlptracehttp.WithInsecure()
 
 	// Update default OTLP reciver endpoint
-	endpointOpt := otlptracehttp.WithEndpoint(OtlpEndpoint)
+	endpointOpt := otlptracehttp.WithEndpoint("localhost:4318")
 
 	return otlptracehttp.New(ctx, insecureOpt, endpointOpt)
 }
