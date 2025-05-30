@@ -5,7 +5,7 @@ pkill -f "kubectl port-forward" || true
 sleep 2
 
 ## Subir o banco
-docker compose up -d
+docker-compose up -d
 
 # Subir grafana, prometheus e tempo
 cd terraform/
