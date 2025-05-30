@@ -1,0 +1,32 @@
+syntax = "proto3";
+package inventory;
+option go_package = "api/shipping";
+
+message InventoryItem {
+  int32 product_id = 1;
+  int32 quantity = 2;
+}
+
+message CheckAndReserveStockRequest {
+  int32 order_id = 1;
+  repeated InventoryItem items = 2;
+}
+
+message CheckAndReserveStockResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ReleaseStockRequest {
+  int32 order_id = 1;
+}
+
+message ReleaseStockResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+service InventoryService {
+  rpc CheckAndReserveStock(CheckAndReserveStockRequest) returns (CheckAndReserveStockResponse);
+  rpc ReleaseStock(ReleaseStockRequest) returns (ReleaseStockResponse);
+}

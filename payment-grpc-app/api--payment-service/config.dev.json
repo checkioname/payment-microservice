@@ -1,0 +1,10 @@
+{
+  "database": {
+    "user": "postgres",
+    "password": "admin",
+    "dbname": "ws",
+    "sslmode": "disable",
+    "host": "host.docker.internal",
+    "port": 5432
+  }
+}
