@@ -1,4 +1,3 @@
-
 # Etapa 1: Build da aplicação
 FROM golang:1.24-alpine AS builder
 
@@ -12,7 +11,7 @@ RUN go mod download
 COPY . .
 
 # Build binário (ajuste se o entrypoint não for main.go)
-RUN go build -o inventory-service ./cmd/main.go
+RUN go build -o invoice-service ./cmd/main.go
 
 # Etapa 2: Imagem final enxuta
 FROM alpine:3.18
@@ -20,11 +19,11 @@ FROM alpine:3.18
 WORKDIR /app
 
 # Copia apenas o binário da etapa anterior
-COPY --from=builder /app/inventory-service .
+COPY --from=builder /app/invoice-service .
 COPY config.dev.json .
 
 # Expõe as portas necessárias
-EXPOSE 8080 8082 8008
+EXPOSE 8080
 
 # Defina o entrypoint
-ENTRYPOINT ["./inventory-service"]
+ENTRYPOINT ["./invoice-service"]

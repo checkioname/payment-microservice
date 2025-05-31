@@ -3,6 +3,8 @@ package client
 import (
 	"anturiocode/api--order-service/internal/api/protos/shipping"
 	"context"
+	"fmt"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -12,13 +14,14 @@ type ShippingClient struct {
 	conn   *grpc.ClientConn
 }
 
-func NewShippingClient(addr string) (*ShippingClient, error) {
+func NewShippingClient(addr string) *ShippingClient {
 	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return nil, err
+		fmt.Println("Erro ao criar client do Shipping", err)
+		return nil
 	}
 	client := shipping.NewShippingServiceClient(conn)
-	return &ShippingClient{client: client, conn: conn}, nil
+	return &ShippingClient{client: client, conn: conn}
 }
 
 func (pc *ShippingClient) ShipOrder(id int32) (*shipping.DispatchOrderResponse, error) {

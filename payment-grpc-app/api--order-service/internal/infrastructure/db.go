@@ -1,9 +1,10 @@
 package infrastructure
 
 import (
-	"anturiocode/api--order-service/infrastructure/config"
+	"anturiocode/api--order-service/internal/infrastructure/config"
 	"database/sql"
 	"fmt"
+
 	_ "github.com/lib/pq"
 )
 

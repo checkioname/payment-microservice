@@ -6,7 +6,6 @@ import (
 	"os"
 )
 
-// Estrutura para mapear o arquivo JSON
 type Config struct {
 	Database DatabaseConfig `json:"database"`
 }
@@ -20,7 +19,6 @@ type DatabaseConfig struct {
 	Port     int    `json:"port"`
 }
 
-// Função para carregar o arquivo de configuração
 func LoadConfig(path string) (*Config, error) {
 	file, err := os.Open(path)
 	if err != nil {

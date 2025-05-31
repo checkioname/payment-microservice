@@ -1,22 +1,19 @@
 package main
 
 import (
-	"anturiocode/api--payment-service/internal/api/protos/api"
-	"anturiocode/api--payment-service/internal/application"
-	"anturiocode/api--payment-service/internal/infrastructure"
-	"anturiocode/api--payment-service/internal/infrastructure/config"
-	"anturiocode/api--payment-service/internal/infrastructure/observability"
-	"anturiocode/api--payment-service/internal/infrastructure/repositories"
+	"anturiocode/api--invoice-service/internal/infrastructure/config"
+	"anturiocode/api--invoice-service/internal/infrastructure/observability"
 	"context"
 	"flag"
 	"fmt"
-	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-	"go.opentelemetry.io/otel"
-	"google.golang.org/grpc"
 	"log"
 	"net"
 	"os"
 	"os/signal"
+
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -45,9 +42,7 @@ func main() {
 	)
 
 	// IOC
-	store, _ := infrastructure.NewPostgresStore(cfg.Database)
-	repo := repositories.NewPaymentRepository(store, tracer)
-	app := application.NewPaymentService(repo, tracer)
+	app := application.NewInventoryService(tracer)
 	api.RegisterPayerServer(grpcServer, app)
 
 	// initialize server

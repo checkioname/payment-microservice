@@ -3,6 +3,8 @@ package client
 import (
 	"anturiocode/api--order-service/internal/api/protos/invoice"
 	"context"
+	"fmt"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -12,13 +14,14 @@ type InvoiceClient struct {
 	conn   *grpc.ClientConn // Opcional: guardar para fechar depois
 }
 
-func NewInvoiceClient(addr string) (*InvoiceClient, error) {
-	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+func NewInvoiceClient(addr string) *InvoiceClient {
+	conn, err := grpc.Dial(":8009", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return nil, err
+		fmt.Println("Erro ao criar client invoice", err)
+		return nil
 	}
 	client := invoice.NewInvoicerClient(conn)
-	return &InvoiceClient{client: client, conn: conn}, nil
+	return &InvoiceClient{client: client, conn: conn}
 }
 
 func (pc *InvoiceClient) GetInvoice(orderID int32, ctx context.Context) (*invoice.InvoiceResponse, error) {

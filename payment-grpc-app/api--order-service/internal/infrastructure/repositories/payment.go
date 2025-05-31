@@ -1,10 +1,11 @@
 package repositories
 
 import (
-	"anturiocode/api--order-service/infrastructure"
+	"anturiocode/api--order-service/internal/infrastructure"
 	"context"
-	"go.opentelemetry.io/otel/trace"
 	"time"
+
+	"go.opentelemetry.io/otel/trace"
 )
 
 type PaymentRepository interface {
