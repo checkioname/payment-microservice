@@ -3,6 +3,7 @@ package observability
 import (
 	"context"
 	"fmt"
+
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -27,7 +28,7 @@ func NewOTLPExporter(ctx context.Context) (oteltrace.SpanExporter, error) {
 	insecureOpt := otlptracehttp.WithInsecure()
 
 	// Update default OTLP reciver endpoint
-	endpointOpt := otlptracehttp.WithEndpoint("http://tempo.monitoring:4318")
+	endpointOpt := otlptracehttp.WithEndpoint("tempo.monitoring:4318")
 
 	return otlptracehttp.New(ctx, insecureOpt, endpointOpt)
 }
