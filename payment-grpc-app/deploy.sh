@@ -1,5 +1,13 @@
 set -ex
 
+
+# Atualizando as imagens 
+cd api--payment-service
+sudo docker build -t lucas10sh/payment-service:latest .
+sudo docker push lucas10sh/payment-service:latest
+cd ..
+
+
 echo "Matando port-forwards antigos..."
 pkill -f "kubectl port-forward" || true
 sleep 2
