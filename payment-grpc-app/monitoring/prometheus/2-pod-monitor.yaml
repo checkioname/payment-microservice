@@ -2,8 +2,9 @@ apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
   name: payment-service
+  namespace: monitoring                  
   labels:
-    release: prometheus-stack    # (OU use o .Release.Name do Helm Stack Prometheus)
+    release: prometheus-stack           
 spec:
   selector:
     matchLabels:
