@@ -23,7 +23,7 @@ COPY --from=builder /app/shipping-service .
 COPY config.dev.json .
 
 # Expõe as portas necessárias
-EXPOSE 8080 
+EXPOSE 8080 8011
 
 # Defina o entrypoint
 ENTRYPOINT ["./shipping-service"]

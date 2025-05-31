@@ -49,10 +49,10 @@ func NewOrderService(r repositories.OrderRepository, tracer trace.Tracer, m *obs
 		R:         r,
 		t:         tracer,
 		metrics:   m,
-		payment:   client.NewPaymentClient("8008"),
-		inventory: client.NewInventoryClient(":8010"),
-		shipping:  client.NewShippingClient(":8011"),
-		invoice:   client.NewInvoiceClient(":8012"),
+		payment:   client.NewPaymentClient("payment-service:8008"),
+		inventory: client.NewInventoryClient("invetory-service:8010"),
+		shipping:  client.NewShippingClient("shipping-service:8011"),
+		invoice:   client.NewInvoiceClient("invoice-service:8012"),
 	}
 }
 

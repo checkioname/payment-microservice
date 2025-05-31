@@ -2,16 +2,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: order-service
+  name: shipping-service
   labels:
-    app: order-service
+    app: shipping-service
 spec:
   selector:
-    app: order-service
+    app: shipping-service
   ports:
     - name: grpc
-      port: 8007
-      targetPort: 8007
+      port: 8011
+      targetPort: 8011
     - name: metrics
       port: 8082
       targetPort: 8082

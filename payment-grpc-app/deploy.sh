@@ -71,7 +71,7 @@ kubectl apply -R -f api--invoice-service/k8s
 kubectl rollout status deployment/invoice-service --timeout=90s
 
 kubectl apply -R -f api--shipping-service/k8s
-kubectl rollout status deployment/shipping-service --timeout=90s
+# kubectl rollout status deployment/shipping-service --timeout=90s
 
 #todos os port forward
 kubectl port-forward svc/order-service 8007:8007 &

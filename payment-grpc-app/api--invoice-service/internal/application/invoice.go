@@ -4,9 +4,10 @@ import (
 	invoice "anturiocode/api--invoice-service/internal/api/protos"
 	"context"
 	"fmt"
-	"go.opentelemetry.io/otel/trace"
 	"math/rand"
 	"time"
+
+	"go.opentelemetry.io/otel/trace"
 )
 
 type InvoiceService struct {

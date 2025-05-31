@@ -47,7 +47,7 @@ func main() {
 		fmt.Println("Servidor prometheus ouvindo em 7000")
 	}()
 
-	// OPTL
+	// OPTL``
 	exporter, err := observability.NewOTLPExporter(ctx)
 	if err != nil {
 		fmt.Printf("Erro ao inicializar as métricas: %v", err)

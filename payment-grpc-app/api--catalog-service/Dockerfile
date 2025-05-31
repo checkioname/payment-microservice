@@ -23,7 +23,7 @@ COPY --from=builder /app/catalog-service .
 COPY config.dev.json .
 
 # Expõe as portas necessárias
-EXPOSE 8080
+EXPOSE 8080 
 
 # Defina o entrypoint
 ENTRYPOINT ["./catalog-service"]

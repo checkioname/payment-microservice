@@ -2,25 +2,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: invoice-service
+  name: shipping-service
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: invoice-service
+      app: shipping-service
   template:
     metadata:
       labels:
-        app: invoice-service
+        app: shipping-service
     spec:
       containers:
-        - name: invoice-service
-          image: lucas10sh/invoice-service:latest
+        - name: shipping-service
+          image: lucas10sh/shipping-service:latest
           imagePullPolicy: Always
           ports:
                 - name: grpc
-                  containerPort: 8012
+                  containerPort: 8011
                 - name: metrics
                   containerPort: 8082
           env:
