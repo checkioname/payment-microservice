@@ -7,12 +7,18 @@ sleep 2
 ## Subir o banco
 docker-compose up -d
 
+
+# instalar crd's
+echo "Instalando CRDs do Prometheus Operator (idempotente)..."
+#kubectl apply --server-side -f https://github.com/prometheus-operator/prometheus-operator/releases/latest/download/bundle.yaml
+
+kubectl apply -R -f monitoring/prometheus
+
 # Subir grafana, prometheus e tempo
 cd terraform/
 terraform init
-terraform apply
+terraform apply -auto-approve
 cd ..
-
 
 # garantir que o servico ja nao foi criado antes
 kubectl delete deployment payment-service --ignore-not-found=true
