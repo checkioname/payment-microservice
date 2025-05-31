@@ -15,7 +15,7 @@ type InvoiceClient struct {
 }
 
 func NewInvoiceClient(addr string) *InvoiceClient {
-	conn, err := grpc.Dial(":8009", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		fmt.Println("Erro ao criar client invoice", err)
 		return nil

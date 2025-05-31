@@ -2,21 +2,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: order-service
+  name: catalog-service
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: order-service
+      app: catalog-service
   template:
     metadata:
       labels:
-        app: order-service
+        app: catalog-service
     spec:
       containers:
-        - name: order-service
-          image: lucas10sh/order-service:latest
+        - name: catalog-service
+          image: lucas10sh/catalog-service:latest
           imagePullPolicy: Always
           ports:
                 - name: grpc

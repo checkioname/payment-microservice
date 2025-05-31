@@ -1,8 +1,8 @@
 package main
 
 import (
-	shipping "anturiocode/api--logistics-service/internal/api/protos"
-	"anturiocode/api--logistics-service/internal/application"
+	inventory "anturiocode/api--inventory-service/internal/api/protos"
+	"anturiocode/api--inventory-service/internal/application"
 	"flag"
 	"fmt"
 
@@ -21,11 +21,11 @@ func main() {
 	)
 
 	// IOC
-	app := application.NewShippingService(nil)
-	shipping.RegisterShippingServiceServer(grpcServer, app)
+	app := application.NewInventoryService(nil)
+	inventory.RegisterInventoryServiceServer(grpcServer, app)
 
 	// initialize server
-	port := flag.Int("port", 8011, "The server port")
+	port := flag.Int("port", 8010, "The server port")
 	go func() {
 		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 		if err != nil {

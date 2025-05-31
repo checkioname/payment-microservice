@@ -7,6 +7,7 @@ import (
 	"anturiocode/api--order-service/internal/infrastructure/repositories"
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"math/rand"
 
@@ -57,9 +58,10 @@ func NewOrderService(r repositories.OrderRepository, tracer trace.Tracer, m *obs
 
 func (o *OrderService) CreateOrder(ctx context.Context, req *order.CreateOrderRequest) (*order.CreateOrderResponse, error) {
 	resp, err := o.payment.PayOrder(req)
+	fmt.Println("pagamento request recebi")
 	if err != nil {
-		slog.Warn("Erro no processamento gRPC:", err)
-		return &order.CreateOrderResponse{}, errors.New("fail to create order")
+		slog.Warn("Erro no pagamento gRPC:", err)
+		return &order.CreateOrderResponse{Order: &order.Order{Status: "Erro interno"}}, nil
 	}
 
 	if !resp.Success {
@@ -68,8 +70,9 @@ func (o *OrderService) CreateOrder(ctx context.Context, req *order.CreateOrderRe
 	}
 
 	// Registra um pedido no banco e parte para o estoque
-	orderDomain := newOrder(req.CustomerId, req.Items)
+	orderDomain := newOrder(11111, req.Items)
 	_ = o.R.RegisterOrder(orderDomain.OrderID, ctx)
+	fmt.Println("registrei ordem no banco")
 
 	go func(orderId int32) {
 		resp, err := o.invoice.GetInvoice(1234, ctx)

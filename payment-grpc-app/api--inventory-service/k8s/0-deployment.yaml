@@ -2,21 +2,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: order-service
+  name: inventory-service
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: order-service
+      app: inventory-service
   template:
     metadata:
       labels:
-        app: order-service
+        app: inventory-service
     spec:
       containers:
-        - name: order-service
-          image: lucas10sh/order-service:latest
+        - name: inventory-service
+          image: lucas10sh/inventory-service:latest
           imagePullPolicy: Always
           ports:
                 - name: grpc

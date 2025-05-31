@@ -4,7 +4,7 @@
     "password": "admin",
     "dbname": "ws",
     "sslmode": "disable",
-    "host": "172.17.0.1",
+    "host": "host.docker.internal",
     "port": 5432
   }
 }

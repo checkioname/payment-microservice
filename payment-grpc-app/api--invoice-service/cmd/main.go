@@ -1,54 +1,33 @@
 package main
 
 import (
-	"anturiocode/api--invoice-service/internal/infrastructure/config"
-	"anturiocode/api--invoice-service/internal/infrastructure/observability"
-	"context"
+	"anturiocode/api--invoice-service/internal/api/protos"
+	"anturiocode/api--invoice-service/internal/application"
 	"flag"
 	"fmt"
+
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+
+	"google.golang.org/grpc"
 	"log"
 	"net"
 	"os"
 	"os/signal"
-
-	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-	"go.opentelemetry.io/otel"
-	"google.golang.org/grpc"
 )
 
 func main() {
-	ctx := context.Background()
-
-	// prometheus
-	exporter, err := observability.NewOTLPExporter(ctx)
-	if err != nil {
-		log.Fatalf("Erro ao inicializar as métricas: %v", err)
-	}
-
-	tp := observability.NewTraceProvider(exporter)
-	tracer := tp.Tracer("myapp")
-	defer func() { _ = tp.Shutdown(ctx) }()
-
-	otel.SetTracerProvider(tp)
-
-	// dependencies
-	cfg, err := config.LoadConfig("config.dev.json")
-	if err != nil {
-		log.Fatalf("Error loading config: %v", err)
-	}
-
 	grpcServer := grpc.NewServer(
 		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 	)
 
 	// IOC
-	app := application.NewInventoryService(tracer)
-	api.RegisterPayerServer(grpcServer, app)
+	app := application.NewInvoiceService(nil)
+	invoice.RegisterInvoicerServer(grpcServer, app)
 
 	// initialize server
-	port := flag.Int("port", 8008, "The server port")
+	port := flag.Int("port", 8012, "The server port")
 	go func() {
-		lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", *port))
+		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 		if err != nil {
 			log.Fatalf("failed to listen: %v", err)
 			panic(err)

@@ -1,14 +1,14 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: order-servicemonitor
+  name: inventory-servicemonitor
   namespace: monitoring    # geralmente onde está seu Prometheus
   labels:
     release: prometheus    # precisa bater com o label do Prometheus do Helm chart!
 spec:
   selector:
     matchLabels:
-      app: order-service
+      app: inventory-service
   namespaceSelector:
     matchNames:
       - default            # namespace onde está sua API Go (pode ser "default")

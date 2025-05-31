@@ -12,12 +12,10 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"net/http"
 	"os"
 	"os/signal"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 	"google.golang.org/grpc"
@@ -33,19 +31,8 @@ func main() {
 			log.Fatalf("PANIC capturado: %v", r)
 		}
 	}()
-
+	
 	ctx := context.Background()
-
-	//prometheus
-	go func() {
-		http.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{}))
-		err := http.ListenAndServe(":8082", nil)
-		if err != nil {
-			fmt.Println("Erro servidor prometheus", err.Error())
-			return
-		}
-		fmt.Println("Servidor prometheus ouvindo em 7000")
-	}()
 
 	// OPTL
 	exporter, err := observability.NewOTLPExporter(ctx)

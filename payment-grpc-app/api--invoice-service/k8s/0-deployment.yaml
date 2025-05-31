@@ -2,21 +2,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: order-service
+  name: invoice-service
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: order-service
+      app: invoice-service
   template:
     metadata:
       labels:
-        app: order-service
+        app: invoice-service
     spec:
       containers:
-        - name: order-service
-          image: lucas10sh/order-service:latest
+        - name: invoice-service
+          image: lucas10sh/invoice-service:latest
           imagePullPolicy: Always
           ports:
                 - name: grpc
