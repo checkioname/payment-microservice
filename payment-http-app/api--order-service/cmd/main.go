@@ -1,26 +1,24 @@
 package main
 
 import (
-	"anturiocode/api--order-service/internal/api/protos/order"
+	"anturiocode/api--order-service/internal/api"
 	"anturiocode/api--order-service/internal/application"
 	"anturiocode/api--order-service/internal/infrastructure"
 	"anturiocode/api--order-service/internal/infrastructure/config"
 	"anturiocode/api--order-service/internal/infrastructure/observability"
 	"anturiocode/api--order-service/internal/infrastructure/repositories"
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
-	"google.golang.org/grpc"
 )
 
 func main() {
@@ -36,7 +34,7 @@ func main() {
 
 	ctx := context.Background()
 
-	//prometheus
+	//prometheus handler
 	go func() {
 		http.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{}))
 		err := http.ListenAndServe(":8082", nil)
@@ -65,32 +63,27 @@ func main() {
 		fmt.Printf("Error loading config: %v", err)
 	}
 
-	grpcServer := grpc.NewServer(
-		grpc.StatsHandler(otelgrpc.NewServerHandler()),
-	)
-
 	// IOC
 	store, err := infrastructure.NewPostgresStore(cfg.Database)
 	if err != nil {
 		fmt.Printf("Erro ao criar store Postgres: %v", err)
 	}
+
 	repo := repositories.NewOrderRepository(store, tracer)
-	app := application.NewOrderService(repo, tracer, m)
-	order.RegisterOrderServiceServer(grpcServer, app)
+	s := application.NewOrderService(repo, tracer, m)
+	a := api.OrderHandler{S: s}
+	handler := api.NewHandler(&a)
 
 	// initialize server
 	port := flag.Int("port", 8007, "The server port")
 	go func() {
-		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
-		if err != nil {
-			log.Fatalf("failed to listen: %v", err)
-			panic(err)
+		if err := http.ListenAndServe(fmt.Sprintf(":%d", *port), handler); err != nil {
+			if !errors.Is(err, http.ErrServerClosed) {
+				log.Fatal("Couldnt keep up the server alive ", err)
+				panic(err)
+			}
 		}
-		fmt.Printf("Servidor gRPC ouvindo em %s", lis.Addr()) // Adicione este log
-		if err := grpcServer.Serve(lis); err != nil {
-			log.Fatalf("failed to serve: %v", err)
-			panic(err)
-		}
+
 	}()
 
 	fmt.Println("Listening on port papiri", *port)

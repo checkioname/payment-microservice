@@ -1,34 +1,70 @@
 package client
 
 import (
-	"anturiocode/api--order-service/internal/api/protos/shipping"
+	"bytes"
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"net/http"
 )
 
-type ShippingClient struct {
-	client shipping.ShippingServiceClient
-	conn   *grpc.ClientConn
+type ShippingClient interface {
+	ShipOrder(ctx context.Context, id int32) (*DispatchOrderResponse, error)
 }
 
-func NewShippingClient(addr string) *ShippingClient {
-	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		fmt.Println("Erro ao criar client do Shipping", err)
-		return nil
+type shippingClient struct {
+	BaseURL string
+	Client  *http.Client
+}
+
+func NewShippingClient(baseURL string) ShippingClient {
+	return &shippingClient{
+		BaseURL: baseURL,
+		Client:  http.DefaultClient,
 	}
-	client := shipping.NewShippingServiceClient(conn)
-	return &ShippingClient{client: client, conn: conn}
 }
 
-func (pc *ShippingClient) ShipOrder(id int32) (*shipping.DispatchOrderResponse, error) {
-	req := &shipping.DispatchOrderRequest{OrderId: id}
-	return pc.client.DispatchOrder(context.Background(), req)
+// Adapte estes structs conforme o contrato do seu microserviço HTTP de shipping
+type DispatchOrderRequest struct {
+	OrderId int32 `json:"order_id"`
 }
 
-func (pc *ShippingClient) Close() error {
-	return pc.conn.Close()
+type DispatchOrderResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message,omitempty"`
+}
+
+// ShipOrder faz a chamada HTTP para despachar o pedido
+func (sc *shippingClient) ShipOrder(ctx context.Context, id int32) (*DispatchOrderResponse, error) {
+	reqBody := DispatchOrderRequest{OrderId: id}
+	url := fmt.Sprintf("%s/shipping/dispatch", sc.BaseURL) // Ajude esta rota conforme sua API REST
+
+	body, err := json.Marshal(reqBody)
+	if err != nil {
+		return nil, err
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+
+	resp, err := sc.Client.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 300 {
+		return nil, errors.New("shipping service returned http error")
+	}
+
+	var out DispatchOrderResponse
+	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+		return nil, err
+	}
+
+	return &out, nil
 }

@@ -1,8 +1,10 @@
 package application
 
 import (
-	"anturiocode/api--order-service/internal/api/protos/order"
+	"anturiocode/api--order-service/internal/api/requests"
+	"anturiocode/api--order-service/internal/api/responses"
 	"anturiocode/api--order-service/internal/application/client"
+	"anturiocode/api--order-service/internal/domain"
 	"anturiocode/api--order-service/internal/infrastructure/observability"
 	"anturiocode/api--order-service/internal/infrastructure/repositories"
 	"context"
@@ -20,7 +22,7 @@ type Order struct {
 	ItemsId    []int32
 }
 
-func newOrder(customerid int32, itemlist []*order.OrderItem) *Order {
+func newOrder(customerid int32, itemlist []*domain.OrderItem) *Order {
 	var itemsids []int32
 	for _, obj := range itemlist {
 		itemsids = append(itemsids, obj.ProductId)
@@ -33,40 +35,44 @@ func newOrder(customerid int32, itemlist []*order.OrderItem) *Order {
 
 }
 
-type OrderService struct {
-	R         repositories.OrderRepository
-	invoice   *client.InvoiceClient
-	payment   *client.PaymentClient
-	shipping  *client.ShippingClient
-	inventory *client.InventoryClient
-	t         trace.Tracer
-	metrics   *observability.Metrics
-	order.UnimplementedOrderServiceServer
+type OrderService interface {
+	CreateOrder(ctx context.Context, req *requests.CreateOrderRequest) (*responses.CreateOrderResponse, error)
 }
 
-func NewOrderService(r repositories.OrderRepository, tracer trace.Tracer, m *observability.Metrics) order.OrderServiceServer {
-	return &OrderService{
+type orderService struct {
+	R         repositories.OrderRepository
+	payment   client.PaymentClient
+	invoice   client.InvoiceClient
+	inventory client.InventoryClient
+	shipping  client.ShippingClient
+	tracer    trace.Tracer
+	metrics   observability.Metrics
+}
+
+func NewOrderService(r repositories.OrderRepository, tracer trace.Tracer, m *observability.Metrics) OrderService {
+	return &orderService{
 		R:         r,
-		t:         tracer,
-		metrics:   m,
 		payment:   client.NewPaymentClient("payment-service:8008"),
 		inventory: client.NewInventoryClient("inventory-service:8010"),
 		shipping:  client.NewShippingClient("shipping-service:8011"),
 		invoice:   client.NewInvoiceClient("invoice-service:8012"),
+		tracer:    tracer,
+		metrics:   *m,
 	}
 }
 
-func (o *OrderService) CreateOrder(ctx context.Context, req *order.CreateOrderRequest) (*order.CreateOrderResponse, error) {
-	resp, err := o.payment.PayOrder(req)
+func (o *orderService) CreateOrder(ctx context.Context, req *requests.CreateOrderRequest) (*responses.CreateOrderResponse, error) {
+	resp, err := o.payment.PayOrder(ctx, &client.PaymentRequest{OrderId: req.CustomerId})
+
 	fmt.Println("pagamento request recebi")
 	if err != nil {
-		slog.Warn("Erro no pagamento gRPC:", err)
-		return &order.CreateOrderResponse{Order: &order.Order{Status: "Erro interno"}}, nil
+		slog.Warn("Erro no pagamento http:", err)
+		return &responses.CreateOrderResponse{Order: &domain.Order{Status: "Erro interno"}}, nil
 	}
 
 	if !resp.Success {
 		slog.Warn("Erro no processamento do pagamento")
-		return &order.CreateOrderResponse{Order: &order.Order{Status: "Erro no pagamento"}}, errors.New("no processamento do pagamento")
+		return &responses.CreateOrderResponse{Order: &domain.Order{Status: "Erro no pagamento"}}, errors.New("no processamento do pagamento")
 	}
 
 	// Registra um pedido no banco e parte para o estoque
@@ -75,7 +81,7 @@ func (o *OrderService) CreateOrder(ctx context.Context, req *order.CreateOrderRe
 	fmt.Println("registrei ordem no banco")
 
 	go func(orderId int32) {
-		resp, err := o.invoice.GetInvoice(1234, ctx)
+		resp, err := o.invoice.GetInvoice(ctx, 1234)
 		if err != nil {
 			slog.Error("Erro ao emitir nota fiscal", "orderId", orderId, "err", err)
 			return
@@ -83,20 +89,16 @@ func (o *OrderService) CreateOrder(ctx context.Context, req *order.CreateOrderRe
 		slog.Info("Nota fiscal emitida com sucesso", "orderId", orderId, "invoiceNumber", resp.OrderId)
 	}(orderDomain.OrderID)
 
-	stockResp, err := o.inventory.CheckAndReserveStock(orderDomain.OrderID)
+	stockResp, err := o.inventory.CheckAndReserveStock(ctx, orderDomain.OrderID)
 	if !stockResp.Success {
 
-		return &order.CreateOrderResponse{Order: &order.Order{Status: "Erro no estoque"}}, errors.New("erro na separacao do pedido")
+		return &responses.CreateOrderResponse{Order: &domain.Order{Status: "Erro no estoque"}}, errors.New("erro na separacao do pedido")
 	}
 
-	shipResp, err := o.shipping.ShipOrder(orderDomain.OrderID)
+	shipResp, err := o.shipping.ShipOrder(ctx, orderDomain.OrderID)
 	if !shipResp.Success {
-		return &order.CreateOrderResponse{Order: &order.Order{Status: "Erro na logistica"}}, errors.New("erro na logistica")
+		return &responses.CreateOrderResponse{Order: &domain.Order{Status: "Erro na logistica"}}, errors.New("erro na logistica")
 	}
 
-	return &order.CreateOrderResponse{Order: &order.Order{Status: "Pedido criado"}}, nil
-}
-
-func (o *OrderService) UpdateOrderStatus(context.Context, *order.UpdateOrderStatusRequest) (*order.UpdateOrderStatusResponse, error) {
-	return &order.UpdateOrderStatusResponse{}, nil
+	return &responses.CreateOrderResponse{Order: &domain.Order{Status: "Pedido criado"}}, nil
 }

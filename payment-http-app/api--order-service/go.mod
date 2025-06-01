@@ -3,6 +3,8 @@ module anturiocode/api--order-service
 go 1.24.1
 
 require (
+	github.com/go-chi/chi/v5 v5.2.1
+	github.com/go-chi/cors v1.2.1
 	github.com/lib/pq v1.10.9
 	github.com/prometheus/client_golang v1.22.0
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.61.0
@@ -12,7 +14,6 @@ require (
 	go.opentelemetry.io/otel/sdk v1.36.0
 	go.opentelemetry.io/otel/trace v1.36.0
 	google.golang.org/grpc v1.72.1
-	google.golang.org/protobuf v1.36.6
 )
 
 require (
@@ -36,4 +37,5 @@ require (
 	golang.org/x/text v0.25.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250519155744-55703ea1f237 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250519155744-55703ea1f237 // indirect
+	google.golang.org/protobuf v1.36.6 // indirect
 )

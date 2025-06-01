@@ -1,8 +1,8 @@
 package api
 
 import (
-	"anturiocode/api--inventory-service/internal/api/requests"
-	"anturiocode/api--inventory-service/internal/application"
+	"anturiocode/api--order-service/internal/api/requests"
+	"anturiocode/api--order-service/internal/application"
 	"github.com/go-chi/chi/v5"
 
 	"encoding/json"
@@ -12,7 +12,7 @@ import (
 
 type OrderHandler struct {
 	R *chi.Mux
-	S application.InventoryService
+	S application.OrderService
 }
 
 func (a OrderHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -26,21 +26,17 @@ func SendJson(w http.ResponseWriter, status int, rawData any) error {
 	return json.NewEncoder(w).Encode(rawData)
 }
 
-// RESERVE ORDER ITEMS
+// CREATE ORDER
 /////////////////
 
-func (a OrderHandler) HandleCheckAndReserveStock(w http.ResponseWriter, r *http.Request) {
+func (a OrderHandler) HandleCreateOrder(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
 	// parse do body
-	var client requests.CheckAndReserveStockRequest
-
+	var client requests.CreateOrderRequest
 	// fmt.Printf("MENSAGEM RECEBIDA DA CADASTRAR REQUEST: %v \n", r.Body)
-	_, err := a.S.CheckAndReserveStock(ctx, &client)
+	_, err := a.S.CreateOrder(ctx, &client)
 	if err != nil {
 		log.Printf("Nao foi possivel criar o cliente %v", err)
-		SendJson(w, 400, "Estoque com falha")
-		return
 	}
 
 	SendJson(w, 200, "Mensagem enviado ao topico com sucesso")

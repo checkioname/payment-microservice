@@ -1,35 +1,71 @@
 package client
 
 import (
-	order2 "anturiocode/api--order-service/internal/api/protos/order"
-	"anturiocode/api--order-service/internal/api/protos/payment"
-	payment2 "anturiocode/api--order-service/internal/api/protos/payment"
+	"bytes"
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"net/http"
 )
 
-type PaymentClient struct {
-	client payment.PayerClient
-	conn   *grpc.ClientConn
+type PaymentRequest struct {
+	OrderId int32 `json:"order_id"`
 }
 
-func NewPaymentClient(addr string) *PaymentClient {
-	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+type PaymentResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message,omitempty"`
+}
+
+type PaymentClient interface {
+	PayOrder(ctx context.Context, req *PaymentRequest) (*PaymentResponse, error)
+}
+type paymentClient struct {
+	BaseURL string
+	Client  *http.Client
+}
+
+func NewPaymentClient(baseURL string) PaymentClient {
+	return &paymentClient{
+		BaseURL: baseURL,
+		Client:  http.DefaultClient, // ou use um custom http.Client se quiser
+	}
+}
+
+func (pc *paymentClient) PayOrder(ctx context.Context, req *PaymentRequest) (*PaymentResponse, error) {
+	url := fmt.Sprintf("%s/payment", pc.BaseURL)
+
+	// Monta o JSON do request
+	body, err := json.Marshal(req)
 	if err != nil {
-		fmt.Println("Erro ao criar client do inventory", err)
-		return nil
-	}
-	client := payment.NewPayerClient(conn)
-	return &PaymentClient{client: client, conn: conn}
-}
-
-func (oc *PaymentClient) PayOrder(req *order2.CreateOrderRequest) (*payment2.PaymentResponse, error) {
-	r := &payment2.PaymentRequest{
-		OrderId: req.CustomerId,
+		return nil, err
 	}
 
-	return oc.client.ProcessPayment(context.Background(), r)
+	// Cria a requisição HTTP
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+
+	// Executa a chamada
+	resp, err := pc.Client.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	// Verifica se deu erro HTTP
+	if resp.StatusCode >= 300 {
+		return nil, errors.New("payment service returned http error")
+	}
+
+	// Decodifica body
+	var out PaymentResponse
+	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+		return nil, err
+	}
+
+	return &out, nil
 }

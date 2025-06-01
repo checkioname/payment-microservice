@@ -1,7 +1,8 @@
 package application
 
 import (
-	inventory "anturiocode/api--inventory-service/internal/api/protos"
+	"anturiocode/api--inventory-service/internal/api/requests"
+	"anturiocode/api--inventory-service/internal/api/responses"
 	"context"
 	"fmt"
 	"go.opentelemetry.io/otel/trace"
@@ -9,24 +10,21 @@ import (
 	"time"
 )
 
-type InventoryService struct {
+type InventoryService interface {
+	CheckAndReserveStock(context.Context, *requests.CheckAndReserveStockRequest) (*responses.CheckAndReserveStockResponse, error)
+}
+
+type inventoryService struct {
 	tracer trace.Tracer
-	inventory.UnimplementedInventoryServiceServer
 }
 
-func NewInventoryService(t trace.Tracer) inventory.InventoryServiceServer {
-	return &InventoryService{tracer: t}
+func NewInventoryService(t trace.Tracer) InventoryService {
+	return &inventoryService{tracer: t}
 }
 
-func (i InventoryService) CheckAndReserveStock(context.Context, *inventory.CheckAndReserveStockRequest) (*inventory.CheckAndReserveStockResponse, error) {
+func (i *inventoryService) CheckAndReserveStock(context.Context, *requests.CheckAndReserveStockRequest) (*responses.CheckAndReserveStockResponse, error) {
 	fmt.Println("Dispatch called")
 	time.Sleep(1 * time.Second)
 
-	return &inventory.CheckAndReserveStockResponse{Success: true, Message: "Produto verificado no estoque"}, nil
-}
-
-func (i InventoryService) ReleaseStock(context.Context, *inventory.ReleaseStockRequest) (*inventory.ReleaseStockResponse, error) {
-	fmt.Println("Release called")
-	time.Sleep(1 * time.Second)
-	return &inventory.ReleaseStockResponse{Success: true, Message: "Produto reservado"}, nil
+	return &responses.CheckAndReserveStockResponse{Success: true, Message: "Produto verificado no estoque"}, nil
 }
