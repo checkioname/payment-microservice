@@ -1,12 +1,7 @@
 package main
 
 import (
-	"anturiocode/api--payment-service/internal/api/protos/api"
 	"anturiocode/api--payment-service/internal/application"
-	"anturiocode/api--payment-service/internal/infrastructure"
-	"anturiocode/api--payment-service/internal/infrastructure/config"
-	"anturiocode/api--payment-service/internal/infrastructure/observability"
-	"anturiocode/api--payment-service/internal/infrastructure/repositories"
 	"context"
 	"flag"
 	"fmt"
@@ -22,8 +17,8 @@ import (
 )
 
 func main() {
-	reg := prometheus.NewRegistry()
-	m := observability.NewMetrics(reg)
+	//reg := prometheus.NewRegistry()
+	//m := observability.NewMetrics(reg)
 
 	//panic handler
 	defer func() {
@@ -31,18 +26,18 @@ func main() {
 			log.Fatalf("PANIC capturado: %v", r)
 		}
 	}()
-	
+
 	ctx := context.Background()
 
 	// OPTL
-	exporter, err := observability.NewOTLPExporter(ctx)
-	if err != nil {
-		fmt.Printf("Erro ao inicializar as métricas: %v", err)
-	}
-
-	tp := observability.NewTraceProvider(exporter)
-	tracer := tp.Tracer("payment-service")
-	defer func() { _ = tp.Shutdown(ctx) }()
+	//exporter, err := observability.NewOTLPExporter(ctx)
+	//if err != nil {
+	//	fmt.Printf("Erro ao inicializar as métricas: %v", err)
+	//}
+	//
+	//tp := observability.NewTraceProvider(exporter)
+	//tracer := tp.Tracer("payment-service")
+	//defer func() { _ = tp.Shutdown(ctx) }()
 
 	otel.SetTracerProvider(tp)
 

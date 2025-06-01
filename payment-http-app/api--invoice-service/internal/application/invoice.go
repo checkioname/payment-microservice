@@ -1,26 +1,31 @@
 package application
 
 import (
-	invoice "anturiocode/api--invoice-service/internal/api/protos"
+	"anturiocode/api--invoice-service/internal/api/requests"
+	"anturiocode/api--invoice-service/internal/api/responses"
 	"context"
 	"fmt"
-	"math/rand"
-	"time"
-
 	"go.opentelemetry.io/otel/trace"
+	"math/rand"
+
+	"time"
 )
 
-type InvoiceService struct {
+type InvoiceService interface {
+	GetInvoice(context.Context, *requests.InvoiceRequest) (*responses.InvoiceResponse, error)
+}
+
+type invoiceService struct {
 	tracer trace.Tracer
-	invoice.UnimplementedInvoicerServer
 }
 
-func NewInvoiceService(t trace.Tracer) invoice.InvoicerServer {
-	return &InvoiceService{tracer: t}
+func NewInvoiceService(t trace.Tracer) InvoiceService {
+	return &invoiceService{tracer: t}
 }
 
-func (i InvoiceService) GetInvoice(context.Context, *invoice.InvoiceRequest) (*invoice.InvoiceResponse, error) {
+func (i *invoiceService) GetInvoice(context.Context, *requests.InvoiceRequest) (*responses.InvoiceResponse, error) {
 	fmt.Println("GetInvoice called")
 	time.Sleep(1 * time.Second)
-	return &invoice.InvoiceResponse{Success: true, Message: fmt.Sprintf("Numero da Nota: d%", rand.Int())}, nil
+	return &responses.InvoiceResponse{Success: true, Message: fmt.Sprintf("Numero da Nota: d%", rand.Int())}, nil
+
 }

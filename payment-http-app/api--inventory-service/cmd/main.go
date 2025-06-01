@@ -1,7 +1,6 @@
 package main
 
 import (
-	inventory "anturiocode/api--inventory-service/internal/api/protos"
 	"anturiocode/api--inventory-service/internal/application"
 	"flag"
 	"fmt"
@@ -22,7 +21,6 @@ func main() {
 
 	// IOC
 	app := application.NewInventoryService(nil)
-	inventory.RegisterInventoryServiceServer(grpcServer, app)
 
 	// initialize server
 	port := flag.Int("port", 8010, "The server port")
