@@ -34,10 +34,10 @@ func (a OrderHandler) HandleCreateOrder(w http.ResponseWriter, r *http.Request) 
 	// parse do body
 	var client requests.CreateOrderRequest
 	// fmt.Printf("MENSAGEM RECEBIDA DA CADASTRAR REQUEST: %v \n", r.Body)
-	_, err := a.S.CreateOrder(ctx, &client)
+	result, err := a.S.CreateOrder(ctx, &client)
 	if err != nil {
 		log.Printf("Nao foi possivel criar o cliente %v", err)
 	}
 
-	SendJson(w, 200, "Mensagem enviado ao topico com sucesso")
+	SendJson(w, 200, result.Message)
 }

@@ -52,7 +52,7 @@ func main() {
 	}
 
 	tp := observability.NewTraceProvider(exporter)
-	tracer := tp.Tracer("payment-service")
+	tracer := tp.Tracer("order-service")
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	otel.SetTracerProvider(tp)

@@ -67,12 +67,12 @@ func (o *orderService) CreateOrder(ctx context.Context, req *requests.CreateOrde
 	fmt.Println("pagamento request recebi")
 	if err != nil {
 		slog.Warn("Erro no pagamento http:", err)
-		return &responses.CreateOrderResponse{Order: &domain.Order{Status: "Erro interno"}}, nil
+		return &responses.CreateOrderResponse{Message: "Erro interno"}, nil
 	}
 
 	if !resp.Success {
 		slog.Warn("Erro no processamento do pagamento")
-		return &responses.CreateOrderResponse{Order: &domain.Order{Status: "Erro no pagamento"}}, errors.New("no processamento do pagamento")
+		return &responses.CreateOrderResponse{Message: "Erro no pagamento"}, errors.New("no processamento do pagamento")
 	}
 
 	// Registra um pedido no banco e parte para o estoque
@@ -92,13 +92,13 @@ func (o *orderService) CreateOrder(ctx context.Context, req *requests.CreateOrde
 	stockResp, err := o.inventory.CheckAndReserveStock(ctx, orderDomain.OrderID)
 	if !stockResp.Success {
 
-		return &responses.CreateOrderResponse{Order: &domain.Order{Status: "Erro no estoque"}}, errors.New("erro na separacao do pedido")
+		return &responses.CreateOrderResponse{Message: "Erro no estoque"}, errors.New("erro na separacao do pedido")
 	}
 
 	shipResp, err := o.shipping.ShipOrder(ctx, orderDomain.OrderID)
 	if !shipResp.Success {
-		return &responses.CreateOrderResponse{Order: &domain.Order{Status: "Erro na logistica"}}, errors.New("erro na logistica")
+		return &responses.CreateOrderResponse{Message: "Erro na logistica"}, errors.New("erro na logistica")
 	}
 
-	return &responses.CreateOrderResponse{Order: &domain.Order{Status: "Pedido criado"}}, nil
+	return &responses.CreateOrderResponse{Message: "Pedido criado"}, nil
 }

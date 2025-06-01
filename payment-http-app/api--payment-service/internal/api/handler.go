@@ -9,15 +9,12 @@ import (
 	"net/http"
 )
 
-type PaymentHandler interface {
-}
-
-type paymentHandler struct {
+type PaymentHandler struct {
 	R *chi.Mux
-	S application.InvoiceService
+	S application.PaymentService
 }
 
-func (a *paymentHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (a *PaymentHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	a.R.ServeHTTP(w, r)
 }
 
@@ -31,7 +28,7 @@ func SendJson(w http.ResponseWriter, status int, rawData any) error {
 // RESERVE ORDER ITEMS
 /////////////////
 
-func (a *paymentHandler) HandleProcessPayment(w http.ResponseWriter, r *http.Request) {
+func (a *PaymentHandler) HandleProcessPayment(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	// parse do body
@@ -45,5 +42,5 @@ func (a *paymentHandler) HandleProcessPayment(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	SendJson(w, 200, "nota fiscal com sucesso")
+	SendJson(w, 200, "pagamento com sucesso")
 }

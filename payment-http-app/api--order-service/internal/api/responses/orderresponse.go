@@ -1,6 +1,6 @@
 package responses
 
-type CheckAndReserveStockResponse struct {
+type CreateOrderResponse struct {
 	Success bool   `json:"success"`
 	Message string `json:"message,omitempty"`
 }

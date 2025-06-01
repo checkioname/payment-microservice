@@ -2,13 +2,14 @@ package api
 
 import (
 	"fmt"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 
 	"net/http"
 )
 
-func NewHandler(a *OrderHandler) http.Handler {
+func NewHandler(a *PaymentHandler) http.Handler {
 	fmt.Println("New handler chamado")
 	r := chi.NewRouter()
 
@@ -24,7 +25,7 @@ func NewHandler(a *OrderHandler) http.Handler {
 		MaxAge:           300,
 	}))
 
-	r.Post("/order", a.HandleCheckAndReserveStock)
+	r.Post("/payment", a.HandleProcessPayment)
 
 	a.R = r
 	return a
