@@ -35,12 +35,12 @@ func (a *PaymentHandler) HandleProcessPayment(w http.ResponseWriter, r *http.Req
 	var client requests.PaymentRequest
 
 	// fmt.Printf("MENSAGEM RECEBIDA DA CADASTRAR REQUEST: %v \n", r.Body)
-	_, err := a.S.ProcessPayment(ctx, &client)
+	resp, err := a.S.ProcessPayment(ctx, &client)
 	if err != nil {
 		log.Printf("Nao foi possivel nota fiscal %v", err)
 		SendJson(w, 400, "nota fiscal com falha")
 		return
 	}
 
-	SendJson(w, 200, "pagamento com sucesso")
+	SendJson(w, 200, resp)
 }

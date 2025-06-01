@@ -29,7 +29,7 @@ type paymentClient struct {
 func NewPaymentClient(baseURL string) PaymentClient {
 	return &paymentClient{
 		BaseURL: baseURL,
-		Client:  http.DefaultClient, // ou use um custom http.Client se quiser
+		Client:  http.DefaultClient,
 	}
 }
 

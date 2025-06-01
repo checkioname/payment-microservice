@@ -39,5 +39,5 @@ func (a OrderHandler) HandleCreateOrder(w http.ResponseWriter, r *http.Request) 
 		log.Printf("Nao foi possivel criar o cliente %v", err)
 	}
 
-	SendJson(w, 200, result.Message)
+	SendJson(w, 200, result)
 }

@@ -37,7 +37,7 @@ type CheckAndReserveStockResponse struct {
 func (ic *inventoryClient) CheckAndReserveStock(ctx context.Context, id int32) (*CheckAndReserveStockResponse, error) {
 	reqBody := CheckAndReserveStockRequest{OrderId: id}
 
-	url := fmt.Sprintf("%s/inventory/check-and-reserve", ic.BaseURL)
+	url := fmt.Sprintf("%s/inventory", ic.BaseURL)
 	body, err := json.Marshal(reqBody)
 	if err != nil {
 		return nil, err

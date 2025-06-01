@@ -1,7 +1,8 @@
 package application
 
 import (
-	shipping "anturiocode/api--logistics-service/internal/api/protos"
+	"anturiocode/api--logistics-service/internal/api/requests"
+	"anturiocode/api--logistics-service/internal/api/responses"
 	"context"
 	"fmt"
 	"github.com/go-faker/faker/v4"
@@ -10,13 +11,16 @@ import (
 	"time"
 )
 
-type ShippingService struct {
-	tracer trace.Tracer
-	shipping.UnimplementedShippingServiceServer
+type ShippingService interface {
+	DispatchOrder(context.Context, *requests.DispatchOrderRequest) (*responses.DispatchOrderResponse, error)
 }
 
-func NewShippingService(t trace.Tracer) shipping.ShippingServiceServer {
-	return &ShippingService{tracer: t}
+type shippingService struct {
+	tracer trace.Tracer
+}
+
+func NewShippingService(t trace.Tracer) ShippingService {
+	return &shippingService{tracer: t}
 }
 
 type FakeShippingResponse struct {
@@ -25,7 +29,7 @@ type FakeShippingResponse struct {
 	Message      string
 }
 
-func (i ShippingService) DispatchOrder(context.Context, *shipping.DispatchOrderRequest) (*shipping.DispatchOrderResponse, error) {
+func (i *shippingService) DispatchOrder(context.Context, *requests.DispatchOrderRequest) (*responses.DispatchOrderResponse, error) {
 	fmt.Println("Dispatch called")
 	time.Sleep(1 * time.Second)
 
@@ -34,5 +38,5 @@ func (i ShippingService) DispatchOrder(context.Context, *shipping.DispatchOrderR
 	if err != nil {
 		fmt.Println(err)
 	}
-	return &shipping.DispatchOrderResponse{Success: true, TrackingCode: a.TrackingCode, Message: "All good"}, nil
+	return &responses.DispatchOrderResponse{Success: true, TrackingCode: a.TrackingCode, Message: "All good"}, nil
 }

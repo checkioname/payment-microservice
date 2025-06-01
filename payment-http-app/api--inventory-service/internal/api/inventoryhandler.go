@@ -36,12 +36,12 @@ func (a InventoryHandler) HandleCheckAndReserveStock(w http.ResponseWriter, r *h
 	var client requests.CheckAndReserveStockRequest
 
 	// fmt.Printf("MENSAGEM RECEBIDA DA CADASTRAR REQUEST: %v \n", r.Body)
-	_, err := a.S.CheckAndReserveStock(ctx, &client)
+	resp, err := a.S.CheckAndReserveStock(ctx, &client)
 	if err != nil {
 		log.Printf("Nao foi possivel criar o cliente %v", err)
 		SendJson(w, 400, "Estoque com falha")
 		return
 	}
 
-	SendJson(w, 200, "Produto verificado com sucesso")
+	SendJson(w, 200, resp)
 }

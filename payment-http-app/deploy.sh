@@ -3,29 +3,29 @@ set -ex
 
 # Atualizando as imagens
 cd api--order-service
-sudo docker build -t lucas10sh/order-service:latest .
-sudo docker push lucas10sh/order-service:latest
+docker build -t lucas10sh/order-service:latest .
+docker push lucas10sh/order-service:latest
 cd ..
 
 cd api--payment-service
-sudo docker build -t lucas10sh/payment-service:latest .
-sudo docker push lucas10sh/payment-service:latest
+docker build -t lucas10sh/payment-service:latest .
+docker push lucas10sh/payment-service:latest
 cd ..
 
 
 cd api--inventory-service
-sudo docker build -t lucas10sh/inventory-service:latest .
-sudo docker push lucas10sh/inventory-service:latest
+docker build -t lucas10sh/inventory-service:latest .
+docker push lucas10sh/inventory-service:latest
 cd ..
 
 cd api--invoice-service
-sudo docker build -t lucas10sh/invoice-service:latest .
-sudo docker push lucas10sh/invoice-service:latest
+docker build -t lucas10sh/invoice-service:latest .
+docker push lucas10sh/invoice-service:latest
 cd ..
 
 cd api--shipping-service
-sudo docker build -t lucas10sh/shipping-service:latest .
-sudo docker push lucas10sh/shipping-service:latest
+docker build -t lucas10sh/shipping-service:latest .
+docker push lucas10sh/shipping-service:latest
 cd ..
 
 
