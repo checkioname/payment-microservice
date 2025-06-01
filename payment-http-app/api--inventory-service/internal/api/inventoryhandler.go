@@ -10,12 +10,12 @@ import (
 	"net/http"
 )
 
-type OrderHandler struct {
+type InventoryHandler struct {
 	R *chi.Mux
 	S application.InventoryService
 }
 
-func (a OrderHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (a InventoryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	a.R.ServeHTTP(w, r)
 }
 
@@ -29,7 +29,7 @@ func SendJson(w http.ResponseWriter, status int, rawData any) error {
 // RESERVE ORDER ITEMS
 /////////////////
 
-func (a OrderHandler) HandleCheckAndReserveStock(w http.ResponseWriter, r *http.Request) {
+func (a InventoryHandler) HandleCheckAndReserveStock(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	// parse do body
@@ -43,5 +43,5 @@ func (a OrderHandler) HandleCheckAndReserveStock(w http.ResponseWriter, r *http.
 		return
 	}
 
-	SendJson(w, 200, "Mensagem enviado ao topico com sucesso")
+	SendJson(w, 200, "Produto verificado com sucesso")
 }

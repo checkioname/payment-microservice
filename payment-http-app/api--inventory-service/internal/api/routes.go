@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func NewHandler(a *OrderHandler) http.Handler {
+func NewHandler(a *InventoryHandler) http.Handler {
 	fmt.Println("New handler chamado")
 	r := chi.NewRouter()
 
@@ -25,7 +25,7 @@ func NewHandler(a *OrderHandler) http.Handler {
 		MaxAge:           300,
 	}))
 
-	r.Post("/order", a.HandleCheckAndReserveStock)
+	r.Post("/inventory", a.HandleCheckAndReserveStock)
 
 	a.R = r
 	return a
