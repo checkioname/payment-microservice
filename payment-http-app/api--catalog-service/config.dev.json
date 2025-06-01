@@ -1,0 +1,10 @@
+{
+  "database": {
+    "user": "admin",
+    "password": "admin",
+    "dbname": "catalog",
+    "sslmode": "disable",
+    "host": "localhost",
+    "port": 5432
+  }
+}
