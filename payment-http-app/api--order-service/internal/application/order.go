@@ -52,12 +52,16 @@ type orderService struct {
 func NewOrderService(r repositories.OrderRepository, tracer trace.Tracer, m *observability.Metrics) OrderService {
 	return &orderService{
 		R:         r,
-		payment:   client.NewPaymentClient("payment-service:8008"),
-		inventory: client.NewInventoryClient("inventory-service:8010"),
-		shipping:  client.NewShippingClient("shipping-service:8011"),
-		invoice:   client.NewInvoiceClient("invoice-service:8012"),
-		tracer:    tracer,
-		metrics:   *m,
+		payment:   client.NewPaymentClient("http://payment-service:8008"),
+		inventory: client.NewInventoryClient("http://inventory-service:8010"),
+		shipping:  client.NewShippingClient("http://shipping-service:8011"),
+		invoice:   client.NewInvoiceClient("http://invoice-service:8012"),
+		//payment: client.NewPaymentClient("http://localhost:8008"),
+		//inventory: client.NewInventoryClient("http://localhost:8010"),
+		//shipping: client.NewShippingClient("http://localhost:8011"),
+		//invoice: client.NewInvoiceClient("http://localhost:8012"),
+		tracer:  tracer,
+		metrics: *m,
 	}
 }
 
@@ -80,14 +84,11 @@ func (o *orderService) CreateOrder(ctx context.Context, req *requests.CreateOrde
 	_ = o.R.RegisterOrder(orderDomain.OrderID, ctx)
 	fmt.Println("registrei ordem no banco")
 
-	go func(orderId int32) {
-		resp, err := o.invoice.GetInvoice(ctx, 1234)
-		if err != nil {
-			slog.Error("Erro ao emitir nota fiscal", "orderId", orderId, "err", err)
-			return
-		}
-		slog.Info("Nota fiscal emitida com sucesso", "orderId", orderId, "invoiceNumber", resp.OrderId)
-	}(orderDomain.OrderID)
+	_, err = o.invoice.GetInvoice(ctx, 1234)
+	if err != nil {
+		slog.Error("Erro ao emitir nota fiscal", "orderId", orderDomain.OrderID, "err", err)
+		return &responses.CreateOrderResponse{Message: "Erro na nota fiscal"}, errors.New("erro na separacao do pedido")
+	}
 
 	stockResp, err := o.inventory.CheckAndReserveStock(ctx, orderDomain.OrderID)
 	if !stockResp.Success {
@@ -100,5 +101,5 @@ func (o *orderService) CreateOrder(ctx context.Context, req *requests.CreateOrde
 		return &responses.CreateOrderResponse{Message: "Erro na logistica"}, errors.New("erro na logistica")
 	}
 
-	return &responses.CreateOrderResponse{Message: "Pedido criado"}, nil
+	return &responses.CreateOrderResponse{Success: true, Message: "Pedido criado"}, nil
 }

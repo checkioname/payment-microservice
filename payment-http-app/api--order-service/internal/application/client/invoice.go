@@ -39,8 +39,7 @@ type InvoiceResponse struct {
 
 func (ic *invoiceClient) GetInvoice(ctx context.Context, orderID int32) (*InvoiceResponse, error) {
 	reqBody := InvoiceRequest{OrderId: orderID}
-	url := fmt.Sprintf("%s/invoice", ic.BaseURL) // Altere a rota se necessário
-
+	url := fmt.Sprintf("%s/invoices", ic.BaseURL)
 	body, err := json.Marshal(reqBody)
 	if err != nil {
 		return nil, err

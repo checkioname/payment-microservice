@@ -25,7 +25,6 @@ func NewShippingClient(baseURL string) ShippingClient {
 	}
 }
 
-// Adapte estes structs conforme o contrato do seu microserviço HTTP de shipping
 type DispatchOrderRequest struct {
 	OrderId int32 `json:"order_id"`
 }
@@ -35,7 +34,6 @@ type DispatchOrderResponse struct {
 	Message string `json:"message,omitempty"`
 }
 
-// ShipOrder faz a chamada HTTP para despachar o pedido
 func (sc *shippingClient) ShipOrder(ctx context.Context, id int32) (*DispatchOrderResponse, error) {
 	reqBody := DispatchOrderRequest{OrderId: id}
 	url := fmt.Sprintf("%s/shipping/dispatch", sc.BaseURL) // Ajude esta rota conforme sua API REST

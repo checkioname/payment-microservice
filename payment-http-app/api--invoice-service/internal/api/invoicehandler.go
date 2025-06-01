@@ -35,12 +35,12 @@ func (a InvoiceHandler) HandleGetInvoice(w http.ResponseWriter, r *http.Request)
 	var client requests.InvoiceRequest
 
 	// fmt.Printf("MENSAGEM RECEBIDA DA CADASTRAR REQUEST: %v \n", r.Body)
-	_, err := a.S.GetInvoice(ctx, &client)
+	resp, err := a.S.GetInvoice(ctx, &client)
 	if err != nil {
 		log.Printf("Nao foi possivel nota fiscal %v", err)
 		SendJson(w, 400, "nota fiscal com falha")
 		return
 	}
 
-	SendJson(w, 200, "nota fiscal com sucesso")
+	SendJson(w, 200, resp)
 }
