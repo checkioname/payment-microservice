@@ -1,0 +1,32 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog-service
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: catalog-service
+  template:
+    metadata:
+      labels:
+        app: catalog-service
+    spec:
+      containers:
+        - name: catalog-service
+          image: lucas10sh/catalog-service:latest
+          imagePullPolicy: Always
+          ports:
+                - name: grpc
+                  containerPort: 8008
+                - name: metrics
+                  containerPort: 8082
+          env:
+            - name: OTLP_ENDPOINT
+              value: "tempo.monitoring:4318"
+            - name: DATABASE_URL
+              value: "postgres://postgres:devops123@host.docker.internal:5432/postgres?sslmode=disable"
+
+              

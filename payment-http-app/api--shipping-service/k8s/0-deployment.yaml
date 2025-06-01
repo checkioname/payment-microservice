@@ -1,0 +1,32 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shipping-service
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shipping-service
+  template:
+    metadata:
+      labels:
+        app: shipping-service
+    spec:
+      containers:
+        - name: shipping-service
+          image: lucas10sh/shipping-service:latest
+          imagePullPolicy: Always
+          ports:
+                - name: grpc
+                  containerPort: 8011
+                - name: metrics
+                  containerPort: 8082
+          env:
+            - name: OTLP_ENDPOINT
+              value: "tempo.monitoring:4318"
+            - name: DATABASE_URL
+              value: "postgres://postgres:devops123@host.docker.internal:5432/postgres?sslmode=disable"
+
+              

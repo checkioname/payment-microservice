@@ -1,0 +1,32 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      containers:
+        - name: order-service
+          image: lucas10sh/order-service:latest
+          imagePullPolicy: Always
+          ports:
+                - name: grpc
+                  containerPort: 8008
+                - name: metrics
+                  containerPort: 8082
+          env:
+            - name: OTLP_ENDPOINT
+              value: "tempo.monitoring:4318"
+            - name: DATABASE_URL
+              value: "postgres://postgres:devops123@host.docker.internal:5432/postgres?sslmode=disable"
+
+              

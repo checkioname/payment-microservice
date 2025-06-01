@@ -1,0 +1,35 @@
+version: '3.8'
+services:
+#  DATABASE
+  db:
+    image: postgres:latest
+    restart: unless-stopped
+    ports:
+      - ${WS_DATABASE_PORT:-5432}:5432
+    environment:
+      POSTGRES_USER: ${WS_DATABASE_USER}
+      POSTGRES_PASSWORD: ${WS_DATABASE_PASSWORD}
+      POSTGRES_DB: ${WS_DATABASE_NAME}
+    volumes:
+      - db:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - 8081:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: password
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+
+volumes:
+  db:
+    driver: local
+  pgadmin:
+    driver: local
+  grafana:

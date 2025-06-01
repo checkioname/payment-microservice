@@ -10,37 +10,29 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"log"
+	"net"
+	"os"
+	"os/signal"
+
+	"github.com/prometheus/client_golang/prometheus"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 	"google.golang.org/grpc"
-	"log"
-	"net"
-	"net/http"
-	"os"
-	"os/signal"
 )
 
 func main() {
+	reg := prometheus.NewRegistry()
+	m := observability.NewMetrics(reg)
+
 	//panic handler
 	defer func() {
 		if r := recover(); r != nil {
 			log.Fatalf("PANIC capturado: %v", r)
 		}
 	}()
-
+	
 	ctx := context.Background()
-
-	//prometheus
-	go func() {
-		http.Handle("/metrics", promhttp.Handler())
-		err := http.ListenAndServe(":8082", nil)
-		if err != nil {
-			fmt.Println("Erro servidor prometheus", err.Error())
-			return
-		}
-		fmt.Println("Servidor prometheus ouvindo em 7000")
-	}()
 
 	// OPTL
 	exporter, err := observability.NewOTLPExporter(ctx)
@@ -70,7 +62,7 @@ func main() {
 		fmt.Printf("Erro ao criar store Postgres: %v", err)
 	}
 	repo := repositories.NewPaymentRepository(store, tracer)
-	app := application.NewPaymentService(repo, tracer)
+	app := application.NewPaymentService(repo, tracer, m)
 	api.RegisterPayerServer(grpcServer, app)
 
 	// initialize server

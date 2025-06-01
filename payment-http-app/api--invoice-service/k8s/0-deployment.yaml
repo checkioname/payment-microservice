@@ -1,0 +1,32 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: invoice-service
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: invoice-service
+  template:
+    metadata:
+      labels:
+        app: invoice-service
+    spec:
+      containers:
+        - name: invoice-service
+          image: lucas10sh/invoice-service:latest
+          imagePullPolicy: Always
+          ports:
+                - name: grpc
+                  containerPort: 8012
+                - name: metrics
+                  containerPort: 8082
+          env:
+            - name: OTLP_ENDPOINT
+              value: "tempo.monitoring:4318"
+            - name: DATABASE_URL
+              value: "postgres://postgres:devops123@host.docker.internal:5432/postgres?sslmode=disable"
+
+              

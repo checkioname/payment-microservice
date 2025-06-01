@@ -2,15 +2,17 @@ package application
 
 import (
 	"anturiocode/api--payment-service/internal/api/protos/api"
+	"anturiocode/api--payment-service/internal/infrastructure/observability"
 	"anturiocode/api--payment-service/internal/infrastructure/repositories"
 	"context"
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/trace"
 	"math/rand"
 	"strconv"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const (
@@ -26,16 +28,19 @@ var paymentRequests = prometheus.NewCounter(
 )
 
 type PaymentService struct {
-	R repositories.PaymentRepository
+	R       repositories.PaymentRepository
+	tracer  trace.Tracer
+	metrics *observability.Metrics
 	api.UnimplementedPayerServer
-	tracer trace.Tracer
 }
 
-func NewPaymentService(r repositories.PaymentRepository, t trace.Tracer) api.PayerServer {
-	return &PaymentService{R: r, tracer: t}
+func NewPaymentService(r repositories.PaymentRepository, t trace.Tracer, m *observability.Metrics) api.PayerServer {
+	return &PaymentService{R: r, tracer: t, metrics: m}
 }
 
 func (p PaymentService) ProcessPayment(ctx context.Context, request *api.PaymentRequest) (*api.PaymentResponse, error) {
+	start := time.Now()
+
 	// gera um id para rastrear a request
 	ctx, span := p.tracer.Start(ctx, "Service: ProcessPayment",
 		trace.WithAttributes(attribute.String("request.id", strconv.Itoa(int(request.OrderId)))),
@@ -54,11 +59,14 @@ func (p PaymentService) ProcessPayment(ctx context.Context, request *api.Payment
 			paymentRequests.Inc()
 			span.SetAttributes(attribute.Bool("payment.success", true))
 			p.R.RegisterPayment(10, 1, ctx)
-			return &api.PaymentResponse{}, nil
+
+			duration := time.Since(start).Seconds()
+			p.metrics.ObserveDuration("200", "ProcessPayment", duration)
+			return &api.PaymentResponse{Success: true, Message: "Tudo certo com o pagamento"}, nil
 		}
 		span.SetAttributes(attribute.Bool("payment.success", false))
 		span.RecordError(fmt.Errorf("payment processing failed"))
-		return &api.PaymentResponse{}, fmt.Errorf("payment processing failed")
+		return &api.PaymentResponse{Success: false, Message: "Houve um erro no pagamento"}, fmt.Errorf("payment processing failed")
 
 	case <-ctx.Done():
 		span.SetStatus(1, "Context canceled")
